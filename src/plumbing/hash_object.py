@@ -4,7 +4,7 @@ import hashlib
 import zlib
 
 
-def hash_object(file_path, git_dir=".mygit", write=True):
+def hash_object(file_path, git_dir=".mygit", write=False):
     if not os.path.isfile(file_path):
         print(f"Erreur : '{file_path}' est introuvable ou n'est pas un fichier.", file=sys.stderr)
         sys.exit(1)
@@ -23,7 +23,6 @@ def hash_object(file_path, git_dir=".mygit", write=True):
         obj_dir = os.path.join(git_dir, "objects", sha1[:2])
         obj_path = os.path.join(obj_dir, sha1[2:])
 
-        # Créer le répertoire s'il n'existe pas
         os.makedirs(obj_dir, exist_ok=True)
 
         compressed = zlib.compress(full_data)
