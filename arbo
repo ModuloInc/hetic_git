@@ -1,0 +1,29 @@
+heticgit/
+├── README.md
+├── github_workflow.md
+├── docs/
+│   ├── architecture.md
+│   └── tutorials/
+├── src/
+│   ├── __init__.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── objects.py        # Gestion des objets Git (blob, tree, commit)
+│   │   ├── index.py          # Gestion de la staging area
+│   │   ├── refs.py           # Gestion des références (branches, tags)
+│   │   └── repository.py     # Classe principale du repo Git
+│   ├── plumbing/
+│   │   ├── __init__.py
+│   │   ├── hash_object.py
+│   │   ├── cat_file.py
+│   │   ├── write_tree.py
+│   │   └── commit_tree.py
+│   ├── porcelain/
+│   │   ├── __init__.py
+│   │   ├── init.py
+│   │   ├── add.py
+│   │   ├── commit.py
+│   │   ├── status.py
+│   │   └── log.py
+│   └── utils/
+│       ├── __init__.py
