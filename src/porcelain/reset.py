@@ -77,7 +77,9 @@ def reset(commit_ref, mode="mixed", git_dir=GIT_DIR, index_path=INDEX_FILE):
             obj_type, blob_content = read_object(sha1, git_dir)
             if obj_type != "blob":
                 continue
-            os.makedirs(os.path.dirname(path), exist_ok=True)
+            dir_path = os.path.dirname(path)
+            if dir_path:
+                os.makedirs(dir_path, exist_ok=True)
             with open(path, "wb") as f:
                 f.write(blob_content)
     print(f"Working directory réinitialisé sur {tree_sha}")

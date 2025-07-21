@@ -10,7 +10,7 @@ def write_tree(git_dir=".mygit", index_path=".mygit/index"):
 
     tree_content = "\n".join(tree_entries)
     tree_sha1 = hash_object_data(tree_content, "tree", git_dir, write=True)
-    print(tree_sha1)
+    return tree_sha1
 
 if __name__ == "__main__":
-    write_tree()
+    print(write_tree())
