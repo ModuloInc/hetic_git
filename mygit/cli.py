@@ -61,7 +61,7 @@ def cat_file(
 @app.command("write-tree")
 def write_tree():
     write_tree_func()
-    typer.echo("Tree écrit et SHA-1 affiché")
+    typer.echo("Tree")
 
 if __name__ == "__main__":
     app()
