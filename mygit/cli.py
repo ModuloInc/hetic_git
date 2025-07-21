@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 from src.porcelain.init import init as init_func
 from src.plumbing.hash_object import hash_object as hash_object_func
+from src.plumbing.cat_file import cat_file as cat_file_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -33,6 +34,15 @@ def hash_object(
         typer.echo(f"Hash du fichier {file} calculé et écrit dans la base de données")
     else:
         typer.echo(f"Hash du fichier {file} calculé")
+
+@plumbing_app.command("cat-file")
+def cat_file(
+    opt: str = typer.Argument(..., help="Option -t (type) ou -p (pretty-print)"),
+    oid: str = typer.Argument(..., help="OID de l'objet à lire"),
+    git_dir: str = typer.Option(".mygit", help="Chemin du dossier .mygit")
+):
+    """Affiche le type ou le contenu d'un objet Git (blob/tree/commit)"""
+    cat_file_func(oid, opt, git_dir)
 
 if __name__ == "__main__":
     app()
