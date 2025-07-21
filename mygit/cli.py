@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 from src.porcelain.init import init as init_func
 from src.plumbing.hash_object import hash_object as hash_object_func
+from src.porcelain.status import run as status_func  # Ajout pour status
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -27,12 +28,15 @@ def hash_object(
     file: str = typer.Argument(..., help="Fichier à hasher"),
     write: bool = typer.Option(False, "--write", "-w", help="Écrire l'objet dans la base de données Git")
 ):
-
     hash_object_func(file, write=write)
     if write:
         typer.echo(f"Hash du fichier {file} calculé et écrit dans la base de données")
     else:
         typer.echo(f"Hash du fichier {file} calculé")
+
+@app.command("status")
+def status():
+    status_func()
 
 if __name__ == "__main__":
     app()
