@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 from src.porcelain.init import init as init_func
 from src.plumbing.hash_object import hash_object as hash_object_func
 from src.plumbing.cat_file import cat_file as cat_file_func
+from src.porcelain.add import add as add_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -34,6 +35,14 @@ def hash_object(
     else:
         typer.echo(f"Hash du fichier {file} calculé")
 
+@app.command("add")
+@plumbing_app.command("add")
+def add(
+    file: str = typer.Argument(..., help="Fichier à ajouter à l'index")
+):
+    add_func(file)
+    typer.echo(f"Fichier {file} ajouté à l'index")
+    
 @app.command("cat-file")
 @plumbing_app.command("cat-file")
 def cat_file(
