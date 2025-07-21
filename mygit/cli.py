@@ -17,6 +17,7 @@ from src.plumbing.ls_files import ls_files as ls_files_func
 from src.plumbing.show_ref import show_ref as show_ref_func
 from src.plumbing.rev_parse import rev_parse as rev_parse_func
 from src.porcelain.log import log as log_func
+from src.porcelain.rm import rm as rm_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -117,6 +118,21 @@ def rev_parse_cmd(
 def log_cmd():
     """Affiche l'historique des commits depuis HEAD (comme git log)"""
     log_func()
+
+@app.command("rm")
+def rm_cmd(
+    file: str = typer.Argument(..., help="Fichier à supprimer de l'index et du répertoire de travail"),
+    cached: bool = typer.Option(False, "--cached", help="Ne supprimer que de l'index, pas du répertoire de travail")
+):
+    if not cached:
+        if not typer.confirm(f"Êtes-vous sûr de vouloir supprimer {file} du répertoire de travail ?"):
+            typer.echo("Suppression annulée.")
+            raise typer.Exit(0)
+    rm_func(file, cached=cached)
+    if cached:
+        typer.echo(f"Fichier {file} supprimé de l'index seulement.")
+    else:
+        typer.echo(f"Fichier {file} supprimé de l'index et du répertoire de travail.")
 
 if __name__ == "__main__":
     app()
