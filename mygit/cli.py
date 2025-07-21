@@ -18,6 +18,7 @@ from src.plumbing.show_ref import show_ref as show_ref_func
 from src.plumbing.rev_parse import rev_parse as rev_parse_func
 from src.porcelain.log import log as log_func
 from src.porcelain.rm import rm as rm_func
+from src.porcelain.reset import reset as reset_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -133,6 +134,22 @@ def rm_cmd(
         typer.echo(f"Fichier {file} supprimé de l'index seulement.")
     else:
         typer.echo(f"Fichier {file} supprimé de l'index et du répertoire de travail.")
+
+@app.command("reset")
+def reset_cmd(
+    commit_ref: str = typer.Argument(..., help="Référence du commit (SHA, HEAD, branche, etc.)"),
+    soft: bool = typer.Option(False, "--soft", help="Déplacer HEAD seulement"),
+    mixed: bool = typer.Option(False, "--mixed", help="Déplacer HEAD et réinitialiser l'index (défaut)"),
+    hard: bool = typer.Option(False, "--hard", help="Déplacer HEAD, réinitialiser l'index et le working directory")
+):
+    if soft:
+        mode = "soft"
+    elif hard:
+        mode = "hard"
+    else:
+        mode = "mixed"
+    reset_func(commit_ref, mode=mode)
+    typer.echo(f"reset --{mode} effectué sur {commit_ref}")
 
 if __name__ == "__main__":
     app()

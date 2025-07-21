@@ -1,6 +1,8 @@
 # python
 import os
 import time
+import hashlib
+import zlib
 
 GIT_DIR = ".mygit"
 INDEX_FILE = os.path.join(GIT_DIR, "index")
@@ -19,19 +21,34 @@ def read_index():
                 index[filename] = sha1
     return index
 
+from src.plumbing.write_tree import write_tree
 
 def commit(message):
     os.makedirs(COMMITS_DIR, exist_ok=True)
     index = read_index()
     timestamp = int(time.time())
-    commit_hash = str(timestamp)  # Simple hash, à améliorer plus tard
-    commit_file = os.path.join(COMMITS_DIR, commit_hash)
-    with open(commit_file, "w") as f:
-        f.write(f"message: {message}\n")
-        f.write(f"timestamp: {timestamp}\n")
-        f.write("files:\n")
-        for fname, sha1 in index.items():
-            f.write(f"  {fname}: {sha1}\n")
+    # 1. Générer le tree à partir de l'index
+    tree_sha = write_tree()
+    # 2. Construire le contenu du commit avec la ligne tree
+    content_str = f"tree {tree_sha}\n"
+    content_str += f"message: {message}\ntimestamp: {timestamp}\n"
+    for fname, sha1 in index.items():
+        content_str += f"  {fname}: {sha1}\n"
+    # Format Git: header + contenu
+    header = f"commit {len(content_str)}\0".encode()
+    full_data = header + content_str.encode()
+    commit_hash = hashlib.sha1(full_data).hexdigest()
+    # Stocker l'objet commit dans .mygit/objects/
+    obj_dir = os.path.join(GIT_DIR, "objects", commit_hash[:2])
+    obj_path = os.path.join(obj_dir, commit_hash[2:])
+    os.makedirs(obj_dir, exist_ok=True)
+    compressed = zlib.compress(full_data)
+    with open(obj_path, "wb") as f:
+        f.write(compressed)
+    # (Optionnel) écrire aussi dans .mygit/commits/ pour debug
+    # commit_file = os.path.join(COMMITS_DIR, commit_hash)
+    # with open(commit_file, "w") as f:
+    #     f.write(content_str)
     print(f"Commit créé: {commit_hash}")
 
     head_path = os.path.join(GIT_DIR, "HEAD")
