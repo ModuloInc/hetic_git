@@ -14,6 +14,7 @@ from src.porcelain.commit import commit as commit_func
 from src.plumbing.ls_tree import ls_tree as ls_tree_func
 from src.plumbing.write_tree import write_tree as write_tree_func
 from src.plumbing.ls_files import ls_files as ls_files_func
+from src.plumbing.show_ref import show_ref as show_ref_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -94,6 +95,12 @@ def ls_tree_cmd(tree_sha: str, git_dir: str = ".mygit"):
 def ls_files_cmd():
     """Liste tous les fichiers dans l'index (comme git ls-files)"""
     ls_files_func()
+
+@app.command("show-ref")
+@plumbing_app.command("show-ref")
+def show_ref_cmd(git_dir: str = ".mygit"):
+    """Liste toutes les refs et leurs hashes (branches et tags)"""
+    show_ref_func(git_dir)
 
 if __name__ == "__main__":
     app()
