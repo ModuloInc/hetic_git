@@ -31,6 +31,7 @@ def hash_object(file_path, git_dir=".mygit", write=False):
             f.write(compressed)
 
     print(sha1)
+    return sha1
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
