@@ -10,6 +10,8 @@ from src.plumbing.hash_object import hash_object as hash_object_func
 from src.plumbing.cat_file import cat_file as cat_file_func
 from src.porcelain.add import add as add_func
 from src.plumbing.commit_tree import commit_tree as commit_tree_func
+from src.plumbing.ls_tree import ls_tree as ls_tree_func
+from src.plumbing.write_tree import write_tree as write_tree_func
 from src.plumbing.ls_files import ls_files as ls_files_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
@@ -75,6 +77,11 @@ def commit_tree_cmd(
     """Crée un objet commit à partir d'un tree et écrit son oid sur stdout."""
     commit_tree_func(tree_sha, message, parent, git_dir)
 
+@app.command("ls-tree")
+def ls_tree_cmd(tree_sha: str, git_dir: str = ".mygit"):
+    """Liste le contenu d'un objet tree (comme git ls-tree)"""
+    ls_tree_func(tree_sha, git_dir)
+    
 @app.command("ls-files")
 def ls_files_cmd():
     """Liste tous les fichiers dans l'index (comme git ls-files)"""
