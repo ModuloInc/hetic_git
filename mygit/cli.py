@@ -16,6 +16,7 @@ from src.plumbing.write_tree import write_tree as write_tree_func
 from src.plumbing.ls_files import ls_files as ls_files_func
 from src.plumbing.show_ref import show_ref as show_ref_func
 from src.plumbing.rev_parse import rev_parse as rev_parse_func
+from src.porcelain.log import log as log_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -111,6 +112,11 @@ def rev_parse_cmd(
 ):
     """Résout une référence (branche, HEAD, tag, SHA-1) en SHA-1."""
     rev_parse_func(ref, git_dir)
+
+@app.command("log")
+def log_cmd():
+    """Affiche l'historique des commits depuis HEAD (comme git log)"""
+    log_func()
 
 if __name__ == "__main__":
     app()
