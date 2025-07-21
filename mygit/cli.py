@@ -10,6 +10,7 @@ from src.porcelain.init import init as init_func
 from src.plumbing.hash_object import hash_object as hash_object_func
 from src.plumbing.cat_file import cat_file as cat_file_func
 from src.porcelain.add import add as add_func
+from src.porcelain.write_tree import  write_tree as write_tree_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -57,6 +58,11 @@ def cat_file(
         raise typer.Exit(1)
     opt = "-t" if type_ else "-p"
     cat_file_func(oid, opt, git_dir)
+
+@app.command("write-tree")
+def write_tree():
+    write_tree_func()
+    typer.echo("Tree écrit et SHA-1 affiché")
 
 if __name__ == "__main__":
     app()
