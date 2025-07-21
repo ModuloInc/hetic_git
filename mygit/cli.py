@@ -28,20 +28,25 @@ def hash_object(
     file: str = typer.Argument(..., help="Fichier à hasher"),
     write: bool = typer.Option(False, "--write", "-w", help="Écrire l'objet dans la base de données Git")
 ):
-
     hash_object_func(file, write=write)
     if write:
         typer.echo(f"Hash du fichier {file} calculé et écrit dans la base de données")
     else:
         typer.echo(f"Hash du fichier {file} calculé")
 
+@app.command("cat-file")
 @plumbing_app.command("cat-file")
 def cat_file(
-    opt: str = typer.Argument(..., help="Option -t (type) ou -p (pretty-print)"),
     oid: str = typer.Argument(..., help="OID de l'objet à lire"),
+    type_: bool = typer.Option(False, "--type", "-t", help="Afficher le type de l'objet"),
+    pretty: bool = typer.Option(False, "--pretty", "-p", help="Afficher le contenu formaté de l'objet"),
     git_dir: str = typer.Option(".mygit", help="Chemin du dossier .mygit")
 ):
     """Affiche le type ou le contenu d'un objet Git (blob/tree/commit)"""
+    if type_ == pretty:
+        typer.echo("Vous devez spécifier soit --type/-t soit --pretty/-p, mais pas les deux.", err=True)
+        raise typer.Exit(1)
+    opt = "-t" if type_ else "-p"
     cat_file_func(oid, opt, git_dir)
 
 if __name__ == "__main__":
