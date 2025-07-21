@@ -1,7 +1,6 @@
 import typer
 import sys
 import os
-from typing import Optional
 
 # Ajout du chemin du projet au sys.path pour pouvoir importer les modules
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
@@ -10,7 +9,7 @@ from src.porcelain.init import init as init_func
 from src.plumbing.hash_object import hash_object as hash_object_func
 from src.plumbing.cat_file import cat_file as cat_file_func
 from src.porcelain.add import add as add_func
-from src.porcelain.write_tree import  write_tree as write_tree_func
+from src.plumbing.write_tree import  write_tree as write_tree_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
