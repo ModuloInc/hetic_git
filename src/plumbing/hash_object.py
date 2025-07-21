@@ -33,6 +33,22 @@ def hash_object(file_path, git_dir=".mygit", write=False):
     print(sha1)
     return sha1
 
+def hash_object_data(data, obj_type, git_dir=".mygit", write=False):
+    if isinstance(data, str):
+        data = data.encode()
+    header = f"{obj_type} {len(data)}\0".encode()
+    full_data = header + data
+    sha1 = hashlib.sha1(full_data).hexdigest()
+    if write:
+        obj_dir = os.path.join(git_dir, "objects", sha1[:2])
+        obj_path = os.path.join(obj_dir, sha1[2:])
+        os.makedirs(obj_dir, exist_ok=True)
+        compressed = zlib.compress(full_data)
+        with open(obj_path, 'wb') as f:
+            f.write(compressed)
+    print(sha1)
+    return sha1
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python hash_object.py <file_path> [<git_dir>]", file=sys.stderr)
