@@ -1,7 +1,6 @@
 import typer
 import sys
 import os
-from typing import Optional
 
 # Ajout du chemin du projet au sys.path pour pouvoir importer les modules
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
@@ -11,7 +10,6 @@ from src.plumbing.hash_object import hash_object as hash_object_func
 from src.plumbing.cat_file import cat_file as cat_file_func
 from src.porcelain.add import add as add_func
 from src.plumbing.commit_tree import commit_tree as commit_tree_func
-from src.plumbing.write_tree import write_tree as write_tree_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -60,6 +58,11 @@ def cat_file(
     opt = "-t" if type_ else "-p"
     cat_file_func(oid, opt, git_dir)
 
+@app.command("write-tree")
+def write_tree():
+    write_tree_func()
+    typer.echo("Tree")
+    
 @app.command("commit-tree")
 @plumbing_app.command("commit-tree")
 def commit_tree_cmd(
@@ -70,15 +73,6 @@ def commit_tree_cmd(
 ):
     """Crée un objet commit à partir d'un tree et écrit son oid sur stdout."""
     commit_tree_func(tree_sha, message, parent, git_dir)
-
-@app.command("write-tree")
-@plumbing_app.command("write-tree")
-def write_tree_cmd(
-    git_dir: str = typer.Option(".mygit", help="Chemin du dossier .mygit"),
-    index_path: str = typer.Option(".mygit/index", help="Chemin du fichier d'index")
-):
-    """Crée un objet tree à partir de l'index et affiche son SHA-1."""
-    write_tree_func(git_dir, index_path)
 
 if __name__ == "__main__":
     app()

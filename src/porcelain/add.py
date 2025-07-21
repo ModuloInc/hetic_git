@@ -14,7 +14,6 @@ def add(file_path, git_dir=".mygit", index_path=".mygit/index"):
 
     mode = "100644"
     rel_path = os.path.relpath(file_path)
-
     os.makedirs(os.path.dirname(index_path), exist_ok=True)
     with open(index_path, "a") as idx:
         idx.write(f"{mode} {rel_path} {sha1}\n")
