@@ -34,6 +34,17 @@ def commit(message):
             f.write(f"  {fname}: {sha1}\n")
     print(f"Commit créé: {commit_hash}")
 
+    head_path = os.path.join(GIT_DIR, "HEAD")
+    if os.path.exists(head_path):
+        with open(head_path) as f:
+            content = f.read().strip()
+        if content.startswith("ref: "):
+            ref_rel = content[5:].strip()
+            ref_path = os.path.join(GIT_DIR, ref_rel)
+            os.makedirs(os.path.dirname(ref_path), exist_ok=True)
+            with open(ref_path, "w") as rf:
+                rf.write(commit_hash + "\n")
+
 # Pour l’intégrer à ta CLI :
 # from src.porcelain.commit import commit as commit_func
 # @app.command("commit")

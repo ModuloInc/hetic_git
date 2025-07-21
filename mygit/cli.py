@@ -15,6 +15,7 @@ from src.plumbing.ls_tree import ls_tree as ls_tree_func
 from src.plumbing.write_tree import write_tree as write_tree_func
 from src.plumbing.ls_files import ls_files as ls_files_func
 from src.plumbing.show_ref import show_ref as show_ref_func
+from src.plumbing.rev_parse import rev_parse as rev_parse_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -81,7 +82,7 @@ def commit_tree_cmd(
 
 @app.command("commit")
 def commit_cmd(
-    message: str = typer.Argument(..., help="Message du commit")
+    message: str = typer.Option(..., "-m", "--message", help="Message du commit")
 ):
     commit_func(message)
     typer.echo("Commit créé")
@@ -101,6 +102,15 @@ def ls_files_cmd():
 def show_ref_cmd(git_dir: str = ".mygit"):
     """Liste toutes les refs et leurs hashes (branches et tags)"""
     show_ref_func(git_dir)
+
+@app.command("rev-parse")
+@plumbing_app.command("rev-parse")
+def rev_parse_cmd(
+    ref: str = typer.Argument(..., help="Référence à résoudre (branche, HEAD, SHA-1, tag)"),
+    git_dir: str = typer.Option(".mygit", help="Chemin du dossier .mygit")
+):
+    """Résout une référence (branche, HEAD, tag, SHA-1) en SHA-1."""
+    rev_parse_func(ref, git_dir)
 
 if __name__ == "__main__":
     app()
