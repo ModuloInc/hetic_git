@@ -5,3 +5,4 @@ from .write_tree import write_tree
 from .ls_tree import ls_tree
 from .show_ref import show_ref
 from .ls_files import ls_files
+from .rev_parse import rev_parse
