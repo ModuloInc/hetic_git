@@ -1,6 +1,11 @@
 import sys
 
 def ls_files(index_path=".mygit/index"):
+    """
+    List all files currently tracked in the index (staging area).
+    Args:
+        index_path (str): Path to the index file.
+    """
     try:
         with open(index_path) as idx:
             for line in idx:

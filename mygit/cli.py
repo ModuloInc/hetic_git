@@ -2,7 +2,7 @@ import typer
 import sys
 import os
 
-# Ajout du chemin du projet au sys.path pour pouvoir importer les modules
+# Add the project path to sys.path to allow module imports
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 from src.porcelain.init import init as init_func
@@ -22,128 +22,163 @@ from src.porcelain.reset import reset as reset_func
 from src.porcelain.checkout import checkout as checkout_func
 from src.porcelain.merge import merge as merge_func
 from src.porcelain.status import status as status_func
-app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
+app = typer.Typer(name="mygit", help="A Python implementation of Git")
 
-plumbing_app = typer.Typer(help="Commandes plumbing (bas niveau)")
+plumbing_app = typer.Typer(help="Plumbing (low-level) commands")
 app.add_typer(plumbing_app, name="plumbing")
 
 @app.command()
 def init(
-    path: str = typer.Argument(".", help="Chemin où initialiser le dépôt")
+    path: str = typer.Argument(".", help="Path where to initialize the repository")
 ):
+    """
+    Initialize a new MyGit repository at the specified path.
+    """
     init_func(path)
-    typer.echo(f"Dépôt Git initialisé dans {path}")
+    typer.echo(f"Git repository initialized in {path}")
 
 @app.command("hash-object")
 @plumbing_app.command("hash-object")
 def hash_object(
-    file: str = typer.Argument(..., help="Fichier à hasher"),
-    write: bool = typer.Option(False, "--write", "-w", help="Écrire l'objet dans la base de données Git")
+    file: str = typer.Argument(..., help="File to hash"),
+    write: bool = typer.Option(False, "--write", "-w", help="Write the object to the Git database")
 ):
+    """
+    Compute the hash of a file and optionally write it to the Git database.
+    """
     hash_object_func(file, write=write)
     if write:
-        typer.echo(f"Hash du fichier {file} calculé et écrit dans la base de données")
+        typer.echo(f"Hash for file {file} computed and written to the database")
     else:
-        typer.echo(f"Hash du fichier {file} calculé")
+        typer.echo(f"Hash for file {file} computed")
 
 @app.command("add")
 @plumbing_app.command("add")
 def add(
-    file: str = typer.Argument(..., help="Fichier à ajouter à l'index")
+    file: str = typer.Argument(..., help="File to add to the index")
 ):
+    """
+    Add a file to the index (staging area).
+    """
     add_func(file)
-    typer.echo(f"Fichier {file} ajouté à l'index")
+    typer.echo(f"File {file} added to the index")
 
 @app.command("cat-file")
 @plumbing_app.command("cat-file")
 def cat_file(
-    oid: str = typer.Argument(..., help="OID de l'objet à lire"),
-    type_: bool = typer.Option(False, "--type", "-t", help="Afficher le type de l'objet"),
-    pretty: bool = typer.Option(False, "--pretty", "-p", help="Afficher le contenu formaté de l'objet"),
-    git_dir: str = typer.Option(".mygit", help="Chemin du dossier .mygit")
+    oid: str = typer.Argument(..., help="OID of the object to read"),
+    type_: bool = typer.Option(False, "--type", "-t", help="Show the type of the object"),
+    pretty: bool = typer.Option(False, "--pretty", "-p", help="Show the formatted content of the object"),
+    git_dir: str = typer.Option(".mygit", help="Path to the .mygit directory")
 ):
-    """Affiche le type ou le contenu d'un objet Git (blob/tree/commit)"""
+    """
+    Show the type or content of a Git object (blob/tree/commit).
+    """
     if type_ == pretty:
-        typer.echo("Vous devez spécifier soit --type/-t soit --pretty/-p, mais pas les deux.", err=True)
+        typer.echo("You must specify either --type/-t or --pretty/-p, but not both.", err=True)
         raise typer.Exit(1)
     opt = "-t" if type_ else "-p"
     cat_file_func(oid, opt, git_dir)
 
 @app.command("write-tree")
 def write_tree():
+    """
+    Write the current index as a tree object and print its SHA-1.
+    """
     write_tree_func()
-    typer.echo("Tree")
+    typer.echo("Tree written")
 
 @app.command("commit-tree")
 @plumbing_app.command("commit-tree")
 def commit_tree_cmd(
-    tree_sha: str = typer.Argument(..., help="SHA de l'objet tree"),
-    message: str = typer.Option(..., "-m", "--message", help="Message du commit"),
-    parent: str = typer.Option(None, "-p", "--parent", help="SHA du commit parent"),
-    git_dir: str = typer.Option(".mygit", help="Chemin du dossier .mygit")
+    tree_sha: str = typer.Argument(..., help="SHA of the tree object"),
+    message: str = typer.Option(..., "-m", "--message", help="Commit message"),
+    parent: str = typer.Option(None, "-p", "--parent", help="Parent commit SHA"),
+    git_dir: str = typer.Option(".mygit", help="Path to the .mygit directory")
 ):
-    """Crée un objet commit à partir d'un tree et écrit son oid sur stdout."""
+    """
+    Create a commit object from a tree and print its OID.
+    """
     commit_tree_func(tree_sha, message, parent, git_dir)
 
 @app.command("commit")
 def commit_cmd(
-    message: str = typer.Option(..., "-m", "--message", help="Message du commit")
+    message: str = typer.Option(..., "-m", "--message", help="Commit message")
 ):
+    """
+    Create a new commit from the current index.
+    """
     commit_func(message)
-    typer.echo("Commit créé")
+    typer.echo("Commit created")
     
 @app.command("ls-tree")
 def ls_tree_cmd(tree_sha: str, git_dir: str = ".mygit"):
-    """Liste le contenu d'un objet tree (comme git ls-tree)"""
+    """
+    List the contents of a tree object (like git ls-tree).
+    """
     ls_tree_func(tree_sha, git_dir)
     
 @app.command("ls-files")
 def ls_files_cmd():
-    """Liste tous les fichiers dans l'index (comme git ls-files)"""
+    """
+    List all files in the index (like git ls-files).
+    """
     ls_files_func()
 
 @app.command("show-ref")
 @plumbing_app.command("show-ref")
 def show_ref_cmd(git_dir: str = ".mygit"):
-    """Liste toutes les refs et leurs hashes (branches et tags)"""
+    """
+    List all refs and their hashes (branches and tags).
+    """
     show_ref_func(git_dir)
 
 @app.command("rev-parse")
 @plumbing_app.command("rev-parse")
 def rev_parse_cmd(
-    ref: str = typer.Argument(..., help="Référence à résoudre (branche, HEAD, SHA-1, tag)"),
-    git_dir: str = typer.Option(".mygit", help="Chemin du dossier .mygit")
+    ref: str = typer.Argument(..., help="Reference to resolve (branch, HEAD, SHA-1, tag)"),
+    git_dir: str = typer.Option(".mygit", help="Path to the .mygit directory")
 ):
-    """Résout une référence (branche, HEAD, tag, SHA-1) en SHA-1."""
+    """
+    Resolve a reference (branch, HEAD, tag, SHA-1) to a SHA-1.
+    """
     rev_parse_func(ref, git_dir)
 
 @app.command("log")
 def log_cmd():
-    """Affiche l'historique des commits depuis HEAD (comme git log)"""
+    """
+    Show the commit history from HEAD (like git log).
+    """
     log_func()
 
 @app.command("rm")
 def rm_cmd(
-    file: str = typer.Argument(..., help="Fichier à supprimer de l'index et du répertoire de travail"),
-    cached: bool = typer.Option(False, "--cached", help="Ne supprimer que de l'index, pas du répertoire de travail")
+    file: str = typer.Argument(..., help="File to remove from the index and working directory"),
+    cached: bool = typer.Option(False, "--cached", help="Only remove from index, not from working directory")
 ):
+    """
+    Remove a file from the index and optionally from the working directory.
+    """
     if not cached:
-        if not typer.confirm(f"Êtes-vous sûr de vouloir supprimer {file} du répertoire de travail ?"):
-            typer.echo("Suppression annulée.")
+        if not typer.confirm(f"Are you sure you want to remove {file} from the working directory?"):
+            typer.echo("Removal cancelled.")
             raise typer.Exit(0)
     rm_func(file, cached=cached)
     if cached:
-        typer.echo(f"Fichier {file} supprimé de l'index seulement.")
+        typer.echo(f"File {file} removed from index only.")
     else:
-        typer.echo(f"Fichier {file} supprimé de l'index et du répertoire de travail.")
+        typer.echo(f"File {file} removed from index and working directory.")
 
 @app.command("reset")
 def reset_cmd(
-    commit_ref: str = typer.Argument(..., help="Référence du commit (SHA, HEAD, branche, etc.)"),
-    soft: bool = typer.Option(False, "--soft", help="Déplacer HEAD seulement"),
-    mixed: bool = typer.Option(False, "--mixed", help="Déplacer HEAD et réinitialiser l'index (défaut)"),
-    hard: bool = typer.Option(False, "--hard", help="Déplacer HEAD, réinitialiser l'index et le working directory")
+    commit_ref: str = typer.Argument(..., help="Commit reference (SHA, HEAD, branch, etc.)"),
+    soft: bool = typer.Option(False, "--soft", help="Move HEAD only"),
+    mixed: bool = typer.Option(False, "--mixed", help="Move HEAD and reset the index (default)"),
+    hard: bool = typer.Option(False, "--hard", help="Move HEAD, reset the index and the working directory")
 ):
+    """
+    Reset HEAD, index, and working directory to a given commit.
+    """
     if soft:
         mode = "soft"
     elif hard:
@@ -151,16 +186,18 @@ def reset_cmd(
     else:
         mode = "mixed"
     reset_func(commit_ref, mode=mode)
-    typer.echo(f"reset --{mode} effectué sur {commit_ref}")
+    typer.echo(f"reset --{mode} performed on {commit_ref}")
 
 @app.command("checkout")
 def checkout_cmd(
-    target: str = typer.Argument(..., help="Branche ou SHA à checkout"),
-    b: str = typer.Option(None, "-b", help="Créer une nouvelle branche et la checkout")
+    target: str = typer.Argument(..., help="Branch name or SHA to checkout"),
+    b: str = typer.Option(None, "-b", help="Create a new branch and check it out")
 ):
-    """Bascule sur une branche ou un commit. Utilisez -b <branche> pour créer une branche."""
+    """
+    Switch to a branch or commit. Use -b <branch> to create a branch.
+    """
     checkout_func(target, create_branch=b)
-    typer.echo(f"Checkout effectué sur {b if b else target}")
+    typer.echo(f"Checkout performed on {b if b else target}")
 
 @app.command("status")
 def status_cmd():
@@ -168,12 +205,14 @@ def status_cmd():
 
 @app.command("merge")
 def merge_cmd(
-    target: str = typer.Argument(..., help="Branche ou SHA à fusionner dans HEAD")
+    target: str = typer.Argument(..., help="Branch name or SHA to merge into HEAD")
 ):
-    """Fusionne la branche ou le commit cible dans HEAD (3-way merge, commit de merge, gestion des conflits)."""
+    """
+    Merge the target branch or commit into HEAD (3-way merge, merge commit, conflict management).
+    """
     success = merge_func(target)
     if success:
-        typer.echo(f"Merge de {target} terminé avec succès.")
+        typer.echo(f"Merge of {target} completed successfully.")
 
 if __name__ == "__main__":
     app()

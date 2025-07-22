@@ -2,6 +2,14 @@ import os
 from src.plumbing.hash_object import hash_object_data
 
 def write_tree(git_dir=".mygit", index_path=".mygit/index"):
+    """
+    Write the current index as a tree object and return its SHA-1.
+    Args:
+        git_dir (str): Path to the .mygit directory.
+        index_path (str): Path to the index file.
+    Returns:
+        str: The SHA-1 of the created tree object.
+    """
     tree_entries = []
     with open(index_path) as idx:
         for line in idx:

@@ -4,6 +4,13 @@ import sys
 from src.plumbing.hash_object import hash_object
 
 def add(file_path, git_dir=".mygit", index_path=".mygit/index"):
+    """
+    Add a file to the index (staging area).
+    Args:
+        file_path (str): Path to the file to add.
+        git_dir (str): Path to the .mygit directory.
+        index_path (str): Path to the index file.
+    """
     import io
 
     old_stdout = sys.stdout

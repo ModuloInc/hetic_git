@@ -5,6 +5,14 @@ GIT_DIR = ".mygit"
 INDEX_FILE = os.path.join(GIT_DIR, "index")
 
 def rm(file_path, git_dir=GIT_DIR, index_path=INDEX_FILE, cached=False):
+    """
+    Remove a file from the index and optionally from the working directory.
+    Args:
+        file_path (str): Path to the file to remove.
+        git_dir (str): Path to the .mygit directory.
+        index_path (str): Path to the index file.
+        cached (bool): If True, only remove from index, not from working directory.
+    """
     rel_path = os.path.relpath(file_path)
     # Remove from index
     if not os.path.exists(index_path):

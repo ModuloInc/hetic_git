@@ -3,6 +3,13 @@ from src.porcelain.rev_parse import rev_parse
 from src.plumbing.cat_file import read_object
 
 def parse_commit(content):
+    """
+    Parse the content of a commit object and extract its information.
+    Args:
+        content (bytes): The raw content of the commit object.
+    Returns:
+        dict: Parsed commit information (tree, parent, author, committer, message).
+    """
     lines = content.decode().splitlines()
     commit_info = {}
     i = 0
@@ -24,6 +31,11 @@ def parse_commit(content):
     return commit_info
 
 def log(git_dir='.mygit'):
+    """
+    Print the commit history starting from HEAD.
+    Args:
+        git_dir (str): Path to the .mygit directory.
+    """
     # Get HEAD commit SHA
     head_sha = rev_parse('HEAD', git_dir)
     if isinstance(head_sha, str):

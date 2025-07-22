@@ -11,6 +11,14 @@ CONFLICT_MID =   "=======\n"
 CONFLICT_END =   ">>>>>>> MERGE_HEAD\n"
 
 def parse_tree(tree_sha, git_dir=GIT_DIR):
+    """
+    Parse a tree object and return a dictionary of file entries.
+    Args:
+        tree_sha (str): SHA-1 of the tree object.
+        git_dir (str): Path to the .mygit directory.
+    Returns:
+        dict: {path: (mode, sha1)}
+    """
     obj_type, content = read_object(tree_sha, git_dir)
     if obj_type != "tree":
         raise Exception(f"Object {tree_sha} is not a tree")
@@ -21,7 +29,15 @@ def parse_tree(tree_sha, git_dir=GIT_DIR):
     return entries
 
 def find_merge_base(head_sha, target_sha, git_dir=GIT_DIR):
-    # Naive: if one is ancestor of the other, return that. Otherwise, return None (no merge base)
+    """
+    Find the common ancestor (merge base) of two commits.
+    Args:
+        head_sha (str): SHA-1 of HEAD commit.
+        target_sha (str): SHA-1 of target commit.
+        git_dir (str): Path to the .mygit directory.
+    Returns:
+        str or None: SHA-1 of the merge base, or None if not found.
+    """
     def get_ancestors(sha):
         ancestors = set()
         stack = [sha]
@@ -52,6 +68,16 @@ def find_merge_base(head_sha, target_sha, git_dir=GIT_DIR):
     return list(common)[0]
 
 def merge_trees(base, head, target, git_dir=GIT_DIR):
+    """
+    Merge three trees and detect conflicts.
+    Args:
+        base (dict): Base tree entries.
+        head (dict): HEAD tree entries.
+        target (dict): Target tree entries.
+        git_dir (str): Path to the .mygit directory.
+    Returns:
+        tuple: (merged dict, set of conflict paths)
+    """
     merged = {}
     conflicts = set()
     all_files = set(base.keys()) | set(head.keys()) | set(target.keys())
@@ -72,12 +98,28 @@ def merge_trees(base, head, target, git_dir=GIT_DIR):
     return merged, conflicts
 
 def read_blob(sha, git_dir=GIT_DIR):
+    """
+    Read a blob object and return its content.
+    Args:
+        sha (str): SHA-1 of the blob object.
+        git_dir (str): Path to the .mygit directory.
+    Returns:
+        bytes: Blob content.
+    """
     obj_type, content = read_object(sha, git_dir)
     if obj_type != "blob":
         raise Exception(f"Object {sha} is not a blob")
     return content
 
 def write_conflict_file(path, head_sha, target_sha, git_dir=GIT_DIR):
+    """
+    Write a file with conflict markers for a merge conflict.
+    Args:
+        path (str): Path to the conflicted file.
+        head_sha (str): SHA-1 of the HEAD version.
+        target_sha (str): SHA-1 of the target version.
+        git_dir (str): Path to the .mygit directory.
+    """
     head_content = read_blob(head_sha, git_dir).decode(errors="replace") if head_sha else ""
     target_content = read_blob(target_sha, git_dir).decode(errors="replace") if target_sha else ""
     with open(path, "w") as f:
@@ -88,6 +130,15 @@ def write_conflict_file(path, head_sha, target_sha, git_dir=GIT_DIR):
         f.write(CONFLICT_END)
 
 def merge(target_ref, git_dir=GIT_DIR, index_path=INDEX_FILE):
+    """
+    Merge the target branch or commit into HEAD.
+    Args:
+        target_ref (str): Target branch or commit to merge.
+        git_dir (str): Path to the .mygit directory.
+        index_path (str): Path to the index file.
+    Returns:
+        bool: True if merge was successful, False if there were conflicts or errors.
+    """
     head_sha = rev_parse("HEAD", git_dir)
     target_sha = rev_parse(target_ref, git_dir)
     if head_sha == target_sha:
