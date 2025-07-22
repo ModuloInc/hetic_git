@@ -21,7 +21,7 @@ from src.porcelain.rm import rm as rm_func
 from src.porcelain.reset import reset as reset_func
 from src.porcelain.checkout import checkout as checkout_func
 from src.porcelain.merge import merge as merge_func
-
+from src.porcelain.status import status as status_func
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
 plumbing_app = typer.Typer(help="Commandes plumbing (bas niveau)")
@@ -161,6 +161,10 @@ def checkout_cmd(
     """Bascule sur une branche ou un commit. Utilisez -b <branche> pour créer une branche."""
     checkout_func(target, create_branch=b)
     typer.echo(f"Checkout effectué sur {b if b else target}")
+
+@app.command("status")
+def status_cmd():
+    status_func()
 
 @app.command("merge")
 def merge_cmd(
