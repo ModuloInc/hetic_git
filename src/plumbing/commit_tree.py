@@ -4,12 +4,15 @@ import hashlib
 import zlib
 from datetime import datetime
 
-def commit_tree(tree_sha, message, parent=None, git_dir=".mygit"):
-    # Construction du contenu du commit
+def commit_tree(tree_sha, message, parents=None, git_dir=".mygit"):
 
     lines = [f"tree {tree_sha}"]
-    if parent:
-        lines.append(f"parent {parent}")
+    if parents:
+        if isinstance(parents, str):
+            lines.append(f"parent {parents}")
+        else:
+            for parent in parents:
+                lines.append(f"parent {parent}")
     author = f"Author <author@example.com> {int(datetime.now().timestamp())} +0000"
     committer = author
     lines.append(f"author {author}")
@@ -20,7 +23,6 @@ def commit_tree(tree_sha, message, parent=None, git_dir=".mygit"):
     header = f"commit {len(content)}\0".encode()
     full_data = header + content
     sha1 = hashlib.sha1(full_data).hexdigest()
-    # Écriture de l'objet
 
     obj_dir = os.path.join(git_dir, "objects", sha1[:2])
     obj_path = os.path.join(obj_dir, sha1[2:])
@@ -39,4 +41,4 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--parent", help="Parent commit SHA")
     parser.add_argument("--git-dir", default=".mygit", help="Git directory")
     args = parser.parse_args()
-    commit_tree(args.tree_sha, args.message, args.parent, args.git_dir) 
+    commit_tree(args.tree_sha, args.message, args.parent, args.git_dir)
