@@ -19,6 +19,8 @@ from src.plumbing.rev_parse import rev_parse as rev_parse_func
 from src.porcelain.log import log as log_func
 from src.porcelain.rm import rm as rm_func
 from src.porcelain.reset import reset as reset_func
+from src.porcelain.checkout import checkout as checkout_func
+from src.porcelain.merge import merge as merge_func
 
 app = typer.Typer(name="mygit", help="Une implémentation de Git en Python")
 
@@ -150,6 +152,23 @@ def reset_cmd(
         mode = "mixed"
     reset_func(commit_ref, mode=mode)
     typer.echo(f"reset --{mode} effectué sur {commit_ref}")
+
+@app.command("checkout")
+def checkout_cmd(
+    target: str = typer.Argument(..., help="Branche ou SHA à checkout"),
+    b: str = typer.Option(None, "-b", help="Créer une nouvelle branche et la checkout")
+):
+    """Bascule sur une branche ou un commit. Utilisez -b <branche> pour créer une branche."""
+    checkout_func(target, create_branch=b)
+    typer.echo(f"Checkout effectué sur {b if b else target}")
+
+@app.command("merge")
+def merge_cmd(
+    target: str = typer.Argument(..., help="Branche ou SHA à fusionner dans HEAD")
+):
+    """Fusionne la branche ou le commit cible dans HEAD (3-way merge, commit de merge, gestion des conflits)."""
+    merge_func(target)
+    typer.echo(f"Merge terminé pour {target}")
 
 if __name__ == "__main__":
     app()
