@@ -1,10 +1,7 @@
 import os
 import sys
-from src.plumbing.rev_parse import rev_parse
+from src.porcelain.rev_parse import rev_parse
 from src.plumbing.cat_file import read_object
-from src.plumbing.ls_tree import ls_tree
-from src.plumbing.write_tree import write_tree
-from src.plumbing.commit_tree import commit_tree
 
 GIT_DIR = ".mygit"
 INDEX_FILE = os.path.join(GIT_DIR, "index")

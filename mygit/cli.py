@@ -11,11 +11,11 @@ from src.plumbing.cat_file import cat_file as cat_file_func
 from src.porcelain.add import add as add_func
 from src.plumbing.commit_tree import commit_tree as commit_tree_func
 from src.porcelain.commit import commit as commit_func
-from src.plumbing.ls_tree import ls_tree as ls_tree_func
+from src.porcelain.ls_tree import ls_tree as ls_tree_func
 from src.plumbing.write_tree import write_tree as write_tree_func
-from src.plumbing.ls_files import ls_files as ls_files_func
-from src.plumbing.show_ref import show_ref as show_ref_func
-from src.plumbing.rev_parse import rev_parse as rev_parse_func
+from src.porcelain.ls_files import ls_files as ls_files_func
+from src.porcelain.show_ref import show_ref as show_ref_func
+from src.porcelain.rev_parse import rev_parse as rev_parse_func
 from src.porcelain.log import log as log_func
 from src.porcelain.rm import rm as rm_func
 from src.porcelain.reset import reset as reset_func
