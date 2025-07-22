@@ -9,8 +9,9 @@ setup(
         "typer>=0.16.0",
         "shellingham>=1.3.0",
     ],
-    entry_points="""
-        [console_scripts]
-        mygit=mygit.cli:app
-    """,
+    entry_points={
+        'console_scripts': [
+            'mygit = mygit.cli:main',
+        ],
+    },
 )

@@ -56,16 +56,10 @@ def log(git_dir='.mygit'):
             print(f"Object {current} is not a commit.")
             break
         info = parse_commit(content)
-        print(f"commit {current}")
-        if 'author' in info:
-            print(f"Author: {info['author']}")
-        if 'committer' in info:
-            print(f"Committer: {info['committer']}")
-        print()
-        print(f"    {info.get('message', '')}")
-        print()
+        # Format oneline compatible avec git log --pretty=oneline
+        print(f"message: {info.get('message', '')}")
         parent = info.get('parent')
         if parent:
             current = parent
         else:
-            break 
+            break

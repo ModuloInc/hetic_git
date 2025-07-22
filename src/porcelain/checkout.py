@@ -34,20 +34,18 @@ def checkout(target, create_branch=None, git_dir=GIT_DIR, index_path=INDEX_FILE)
         target = create_branch
 
     # Resolve the target (branch name, tag, or SHA)
-    commit_sha = rev_parse(target, git_dir)
-    # Check if target is a branch
     branch_path = os.path.join(refs_heads_dir, target)
     if os.path.exists(branch_path):
+        commit_sha = rev_parse(target, git_dir)
         # Update HEAD to point to the branch
         with open(head_path, "w") as f:
             f.write(f"ref: refs/heads/{target}\n")
+        # Update index and working directory to match the commit
+        reset(commit_sha, mode="hard", git_dir=git_dir, index_path=index_path)
+        print(f"Switched to branch {target}")
     else:
-        # Detached HEAD
-        with open(head_path, "w") as f:
-            f.write(commit_sha + "\n")
-    # Update index and working directory to match the commit
-    reset(commit_sha, mode="hard", git_dir=git_dir, index_path=index_path)
-    print(f"Switched to {'branch ' + target if os.path.exists(branch_path) else 'commit ' + commit_sha}")
+        print(f"Error: reference '{target}' not found.", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     import argparse
