@@ -14,7 +14,7 @@ def read_index():
     # On ouvre le fichier d'index en lecture
     with open(INDEX_FILE, "r") as f:
         for line in f:
-            # On découpe chaque ligne en 3 parties : mode, nom du fichier, sha1
+            #On découpe chaque ligne en 3 parties : mode, nom du fichier, sha1
             parts = line.strip().split(" ")
             if len(parts) == 3:
                 _, filename, sha1 = parts

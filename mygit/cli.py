@@ -170,7 +170,7 @@ def status_cmd():
 def merge_cmd(
     target: str = typer.Argument(..., help="Branche ou SHA à fusionner dans HEAD")
 ):
-    """Fusionne la branche ou le commit cible dans HEAD (3-way merge, commit de merge, gestion des conflits)."""
+    """Fusionne la branche ou le commit cible dans HEAD(3-way merge, commit de merge, gestion des conflits)."""
     merge_func(target)
     typer.echo(f"Merge terminé pour {target}")
 
