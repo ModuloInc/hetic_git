@@ -50,13 +50,19 @@ def commit(message):
     if os.path.exists(head_path):
         with open(head_path) as f:
             head_content = f.read().strip()
-        if head_content:
-            # We redirect stdout to avoid printing the SHA from rev_parse
+        
+        is_initial_commit = False
+        if head_content.startswith("ref: "):
+            ref_path = os.path.join(GIT_DIR, head_content[5:].strip())
+            if not os.path.exists(ref_path):
+                is_initial_commit = True
+        
+        if not is_initial_commit and head_content:
             old_stdout = sys.stdout
             sys.stdout = io.StringIO()
             try:
                 parent_sha = rev_parse("HEAD", git_dir=GIT_DIR)
-            except SystemExit: # rev_parse can exit on failure
+            except SystemExit:
                 parent_sha = None
             finally:
                 sys.stdout = old_stdout
@@ -96,6 +102,14 @@ def commit(message):
             os.makedirs(os.path.dirname(ref_path), exist_ok=True)
             with open(ref_path, "w") as rf:
                 rf.write(commit_hash + "\n")
+        else:
+            # detached HEAD, write directly
+            with open(head_path, "w") as f:
+                f.write(commit_hash + "\n")
+    else:
+        # HEAD does not exist, create it and point to commit
+        with open(head_path, "w") as f:
+            f.write(commit_hash + "\n")
 
 # For CLI integration:
 # from src.porcelain.commit import commit as commit_func

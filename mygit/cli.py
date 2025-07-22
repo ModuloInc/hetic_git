@@ -190,17 +190,25 @@ def reset_cmd(
 
 @app.command("checkout")
 def checkout_cmd(
-    target: str = typer.Argument(..., help="Branch name or SHA to checkout"),
-    b: str = typer.Option(None, "-b", help="Create a new branch and check it out")
+    target: str = typer.Argument(None, help="Branch name or SHA to checkout"),
+    b: str = typer.Option(None, "-b", help="Create a new branch and check it out"),
+    ctx: typer.Context = typer.Option(None, hidden=True)
 ):
     """
     Switch to a branch or commit. Use -b <branch> to create a branch.
     """
-    checkout_func(target, create_branch=b)
+    if not target and not b:
+        typer.echo("Error: Missing argument 'TARGET' or option '-b'.", err=True)
+        raise typer.Exit(1)
+        
+    actual_target = b if b else target
+    
+    git_dir = ctx.obj.git_dir if ctx and hasattr(ctx.obj, 'git_dir') else ".mygit"
+    checkout_func(actual_target, create_branch=b, git_dir=git_dir)
     typer.echo(f"Checkout performed on {b if b else target}")
 
 @app.command("status")
-def status_cmd():
+def status_cmd(ctx: typer.Context = typer.Option(None, hidden=True)):
     status_func()
 
 @app.command("merge")
@@ -213,6 +221,9 @@ def merge_cmd(
     success = merge_func(target)
     if success:
         typer.echo(f"Merge of {target} completed successfully.")
+
+def main():
+    app()
 
 if __name__ == "__main__":
     app()
