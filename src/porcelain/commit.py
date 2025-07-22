@@ -3,6 +3,8 @@ import os
 import time
 import hashlib
 import zlib
+import io
+import sys
 
 GIT_DIR = ".mygit"
 INDEX_FILE = os.path.join(GIT_DIR, "index")
@@ -22,15 +24,39 @@ def read_index():
     return index
 
 from src.plumbing.write_tree import write_tree
+from src.porcelain.rev_parse import rev_parse
 
 def commit(message):
     os.makedirs(COMMITS_DIR, exist_ok=True)
     index = read_index()
-    timestamp = int(time.time())
-    # 1. Générer le tree à partir de l'index
+    if not index:
+        print("Rien à commiter, l'index est vide.")
+        return
+
     tree_sha = write_tree()
-    # 2. Construire le contenu du commit avec la ligne tree
     content_str = f"tree {tree_sha}\n"
+    
+    parent_sha = None
+    head_path = os.path.join(GIT_DIR, "HEAD")
+    if os.path.exists(head_path):
+        with open(head_path) as f:
+            head_content = f.read().strip()
+        if head_content:
+            # We redirect stdout to avoid printing the SHA from rev_parse
+            old_stdout = sys.stdout
+            sys.stdout = io.StringIO()
+            try:
+                parent_sha = rev_parse("HEAD", git_dir=GIT_DIR)
+            except SystemExit: # rev_parse can exit on failure
+                parent_sha = None
+            finally:
+                sys.stdout = old_stdout
+
+    if parent_sha:
+        content_str += f"parent {parent_sha}\n"
+    
+    timestamp = int(time.time())
+    # 2. Construire le contenu du commit avec la ligne tree
     content_str += f"message: {message}\ntimestamp: {timestamp}\n"
     for fname, sha1 in index.items():
         content_str += f"  {fname}: {sha1}\n"
