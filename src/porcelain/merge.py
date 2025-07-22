@@ -92,12 +92,12 @@ def merge(target_ref, git_dir=GIT_DIR, index_path=INDEX_FILE):
     target_sha = rev_parse(target_ref, git_dir)
     if head_sha == target_sha:
         print("Already up to date.")
-        return
+        return True
     # Find merge base
     base_sha = find_merge_base(head_sha, target_sha, git_dir)
     if not base_sha:
         print("No common ancestor found. Cannot merge.")
-        return
+        return False
     # Read trees
     obj_type, head_commit = read_object(head_sha, git_dir)
     obj_type, target_commit = read_object(target_sha, git_dir)
@@ -131,9 +131,10 @@ def merge(target_ref, git_dir=GIT_DIR, index_path=INDEX_FILE):
     if conflicts:
         print(f"Merge completed with conflicts in: {', '.join(conflicts)}")
         print("Please resolve conflicts and commit.")
-        return
+        return False
     # Write merged tree
     from src.plumbing.hash_object import hash_object_data
+    from src.plumbing.commit_tree import commit_tree
     tree_entries = []
     for path, entry in merged.items():
         if entry is not None:
@@ -144,24 +145,7 @@ def merge(target_ref, git_dir=GIT_DIR, index_path=INDEX_FILE):
     # Create merge commit with two parents
     message = f"Merge commit {target_ref} into HEAD"
     # Use plumbing commit_tree for two parents
-    lines = [f"tree {tree_sha}", f"parent {head_sha}", f"parent {target_sha}"]
-    from datetime import datetime
-    author = f"Author <author@example.com> {int(datetime.now().timestamp())} +0000"
-    lines.append(f"author {author}")
-    lines.append(f"committer {author}")
-    lines.append("")
-    lines.append(message)
-    content = "\n".join(lines).encode()
-    header = f"commit {len(content)}\0".encode()
-    full_data = header + content
-    import hashlib, zlib
-    sha1 = hashlib.sha1(full_data).hexdigest()
-    obj_dir = os.path.join(git_dir, "objects", sha1[:2])
-    obj_path = os.path.join(obj_dir, sha1[2:])
-    os.makedirs(obj_dir, exist_ok=True)
-    compressed = zlib.compress(full_data)
-    with open(obj_path, 'wb') as f:
-        f.write(compressed)
+    sha1 = commit_tree(tree_sha, message, [head_sha, target_sha], git_dir)
     print(f"Merge commit created: {sha1}")
     # Update HEAD
     head_path = os.path.join(git_dir, "HEAD")
@@ -177,9 +161,10 @@ def merge(target_ref, git_dir=GIT_DIR, index_path=INDEX_FILE):
         with open(head_path, "w") as f:
             f.write(sha1 + "\n")
     print("Merge successful.")
+    return True
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python merge.py <branch|sha>", file=sys.stderr)
         sys.exit(1)
-    merge(sys.argv[1]) 
+    merge(sys.argv[1])
