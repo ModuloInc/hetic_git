@@ -1,5 +1,5 @@
 import os
-from src.plumbing.rev_parse import rev_parse
+from src.porcelain.rev_parse import rev_parse
 from src.plumbing.cat_file import read_object
 
 def parse_commit(content):

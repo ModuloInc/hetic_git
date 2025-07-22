@@ -6,7 +6,7 @@ import sys
 import io
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from src.plumbing.ls_files import ls_files
+from src.porcelain.ls_files import ls_files
 
 class TestLsFiles(unittest.TestCase):
     def setUp(self):

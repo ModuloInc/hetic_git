@@ -7,7 +7,7 @@ import io
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from src.plumbing.hash_object import hash_object_data
-from src.plumbing.ls_tree import ls_tree
+from src.porcelain.ls_tree import ls_tree
 
 class TestLsTree(unittest.TestCase):
     def setUp(self):

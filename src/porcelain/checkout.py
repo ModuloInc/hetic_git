@@ -1,7 +1,6 @@
 import os
 import sys
-from src.plumbing.rev_parse import rev_parse
-from src.plumbing.cat_file import read_object
+from src.porcelain.rev_parse import rev_parse
 from src.porcelain.reset import reset
 
 GIT_DIR = ".mygit"
