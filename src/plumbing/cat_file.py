@@ -4,9 +4,25 @@ import zlib
 import hashlib
 
 def get_object_path(oid, git_dir):
+    """
+    Get the path to the object file in the Git directory.
+    Args:
+        oid (str): Object ID (SHA-1).
+        git_dir (str): Path to the .mygit directory.
+    Returns:
+        str: Path to the object file.
+    """
     return os.path.join(git_dir, "objects", oid[:2], oid[2:])
 
 def read_object(oid, git_dir):
+    """
+    Read and decompress a Git object from disk.
+    Args:
+        oid (str): Object ID (SHA-1).
+        git_dir (str): Path to the .mygit directory.
+    Returns:
+        tuple: (object type, content) or (None, None) if not found or corrupted.
+    """
     obj_path = get_object_path(oid, git_dir)
     if not os.path.exists(obj_path):
         return None, None
@@ -25,12 +41,19 @@ def read_object(oid, git_dir):
     return obj_type, content
 
 def cat_file(oid, opt, git_dir):
+    """
+    Print the type or content of a Git object.
+    Args:
+        oid (str): Object ID (SHA-1).
+        opt (str): '-t' for type, '-p' for pretty print content.
+        git_dir (str): Path to the .mygit directory.
+    """
     if opt not in ['-t', '-p']:
-        print("Option invalide. Utilisez -t ou -p.", file=sys.stderr)
+        print("Invalid option. Use -t or -p.", file=sys.stderr)
         sys.exit(1)
     obj_type, content = read_object(oid, git_dir)
     if obj_type is None:
-        print(f"Erreur : OID '{oid}' introuvable ou corrompu.", file=sys.stderr)
+        print(f"Error: OID '{oid}' not found or corrupted.", file=sys.stderr)
         sys.exit(1)
     if opt == '-t':
         print(obj_type)

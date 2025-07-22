@@ -5,7 +5,16 @@ import zlib
 from datetime import datetime
 
 def commit_tree(tree_sha, message, parents=None, git_dir=".mygit"):
-
+    """
+    Create a commit object from a tree and optional parent(s), and write it to the Git database.
+    Args:
+        tree_sha (str): SHA of the tree object.
+        message (str): Commit message.
+        parents (str or list, optional): Parent commit SHA(s).
+        git_dir (str): Path to the .mygit directory.
+    Returns:
+        str: The SHA-1 of the created commit object.
+    """
     lines = [f"tree {tree_sha}"]
     if parents:
         if isinstance(parents, str):

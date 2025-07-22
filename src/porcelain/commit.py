@@ -10,8 +10,12 @@ GIT_DIR = ".mygit"
 INDEX_FILE = os.path.join(GIT_DIR, "index")
 COMMITS_DIR = os.path.join(GIT_DIR, "commits")
 
-# python
 def read_index():
+    """
+    Read the index file and return a dictionary mapping filenames to their SHA-1 hashes.
+    Returns:
+        dict: {filename: sha1}
+    """
     index = {}
     if not os.path.exists(INDEX_FILE):
         return index
@@ -27,10 +31,15 @@ from src.plumbing.write_tree import write_tree
 from src.porcelain.rev_parse import rev_parse
 
 def commit(message):
+    """
+    Create a new commit from the current index and update HEAD.
+    Args:
+        message (str): Commit message.
+    """
     os.makedirs(COMMITS_DIR, exist_ok=True)
     index = read_index()
     if not index:
-        print("Rien à commiter, l'index est vide.")
+        print("Nothing to commit, the index is empty.")
         return
 
     tree_sha = write_tree()
@@ -56,26 +65,26 @@ def commit(message):
         content_str += f"parent {parent_sha}\n"
     
     timestamp = int(time.time())
-    # 2. Construire le contenu du commit avec la ligne tree
+    # 2. Build the commit content with the tree line
     content_str += f"message: {message}\ntimestamp: {timestamp}\n"
     for fname, sha1 in index.items():
         content_str += f"  {fname}: {sha1}\n"
-    # Format Git: header + contenu
+    # Git format: header + content
     header = f"commit {len(content_str)}\0".encode()
     full_data = header + content_str.encode()
     commit_hash = hashlib.sha1(full_data).hexdigest()
-    # Stocker l'objet commit dans .mygit/objects/
+    # Store the commit object in .mygit/objects/
     obj_dir = os.path.join(GIT_DIR, "objects", commit_hash[:2])
     obj_path = os.path.join(obj_dir, commit_hash[2:])
     os.makedirs(obj_dir, exist_ok=True)
     compressed = zlib.compress(full_data)
     with open(obj_path, "wb") as f:
         f.write(compressed)
-    # (Optionnel) écrire aussi dans .mygit/commits/ pour debug
+    # (Optional) also write to .mygit/commits/ for debugging
     # commit_file = os.path.join(COMMITS_DIR, commit_hash)
     # with open(commit_file, "w") as f:
     #     f.write(content_str)
-    print(f"Commit créé: {commit_hash}")
+    print(f"Commit created: {commit_hash}")
 
     head_path = os.path.join(GIT_DIR, "HEAD")
     if os.path.exists(head_path):
@@ -88,8 +97,8 @@ def commit(message):
             with open(ref_path, "w") as rf:
                 rf.write(commit_hash + "\n")
 
-# Pour l’intégrer à ta CLI :
+# For CLI integration:
 # from src.porcelain.commit import commit as commit_func
 # @app.command("commit")
-# def commit_cmd(message: str = typer.Argument(..., help="Message du commit")):
+# def commit_cmd(message: str = typer.Argument(..., help="Commit message")):
 #     commit_func(message)

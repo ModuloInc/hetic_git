@@ -6,8 +6,15 @@ from src.plumbing.cat_file import read_object
 GIT_DIR = ".mygit"
 INDEX_FILE = os.path.join(GIT_DIR, "index")
 
-# Utilitaire pour parser un commit (repris de log.py)
+
 def parse_commit(content):
+    """
+    Parse the content of a commit object and extract its information.
+    Args:
+        content (bytes): The raw content of the commit object.
+    Returns:
+        dict: Parsed commit information (tree, parent, author, committer).
+    """
     lines = content.decode().splitlines()
     commit_info = {}
     for line in lines:
@@ -24,21 +31,29 @@ def parse_commit(content):
     return commit_info
 
 def reset(commit_ref, mode="mixed", git_dir=GIT_DIR, index_path=INDEX_FILE):
-    # 1. Résoudre le commit
+    """
+    Reset HEAD, index, and working directory to a given commit.
+    Args:
+        commit_ref (str): Commit reference (SHA, HEAD, branch, etc.).
+        mode (str): Reset mode: 'soft', 'mixed', or 'hard'.
+        git_dir (str): Path to the .mygit directory.
+        index_path (str): Path to the index file.
+    """
+    # 1. Resolve the commit
     commit_sha = rev_parse(commit_ref, git_dir)
     if not isinstance(commit_sha, str):
-        # rev_parse peut print et return None
-        print(f"Impossible de résoudre {commit_ref}", file=sys.stderr)
+        # rev_parse may print and return None
+        print(f"Unable to resolve {commit_ref}", file=sys.stderr)
         sys.exit(1)
-    # 2. Lire l'objet commit
+    # 2. Read the commit object
     obj_type, commit_content = read_object(commit_sha, git_dir)
     if obj_type != "commit":
-        print(f"{commit_sha} n'est pas un commit.", file=sys.stderr)
+        print(f"{commit_sha} is not a commit.", file=sys.stderr)
         sys.exit(1)
     commit_info = parse_commit(commit_content)
     tree_sha = commit_info["tree"]
-    # 3. --soft: déplacer HEAD
-    # HEAD peut pointer vers une ref ou contenir le SHA directement
+    # 3. --soft: move HEAD
+    # HEAD can point to a ref or contain the SHA directly
     head_path = os.path.join(git_dir, "HEAD")
     with open(head_path) as f:
         head_content = f.read().strip()
@@ -52,14 +67,14 @@ def reset(commit_ref, mode="mixed", git_dir=GIT_DIR, index_path=INDEX_FILE):
         with open(head_path, "w") as f:
             f.write(commit_sha + "\n")
     if mode == "soft":
-        print(f"HEAD déplacé vers {commit_sha}")
+        print(f"HEAD moved to {commit_sha}")
         return
-    # 4. --mixed: réinitialiser l'index
+    # 4. --mixed: reset the index
     obj_type, tree_content = read_object(tree_sha, git_dir)
     if obj_type != "tree":
-        print(f"{tree_sha} n'est pas un tree.", file=sys.stderr)
+        print(f"{tree_sha} is not a tree.", file=sys.stderr)
         sys.exit(1)
-    # On écrase l'index avec le contenu du tree
+    # Overwrite the index with the tree content
     with open(index_path, "w") as idx:
         for line in tree_content.decode().splitlines():
             parts = line.strip().split()
@@ -67,9 +82,9 @@ def reset(commit_ref, mode="mixed", git_dir=GIT_DIR, index_path=INDEX_FILE):
                 mode, path, sha1 = parts
                 idx.write(f"{mode} {path} {sha1}\n")
     if mode == "mixed":
-        print(f"Index réinitialisé sur {tree_sha}")
+        print(f"Index reset to {tree_sha}")
         return
-    # 5. --hard: réinitialiser le working directory
+    # 5. --hard: reset the working directory
     for line in tree_content.decode().splitlines():
         parts = line.strip().split()
         if len(parts) == 3:
@@ -82,16 +97,16 @@ def reset(commit_ref, mode="mixed", git_dir=GIT_DIR, index_path=INDEX_FILE):
                 os.makedirs(dir_path, exist_ok=True)
             with open(path, "wb") as f:
                 f.write(blob_content)
-    print(f"Working directory réinitialisé sur {tree_sha}")
+    print(f"Working directory reset to {tree_sha}")
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Reset HEAD, index, and working directory to a given commit.")
-    parser.add_argument("commit_ref", help="Référence du commit (SHA, HEAD, branche, etc.)")
-    parser.add_argument("--soft", action="store_true", help="Déplacer HEAD seulement")
-    parser.add_argument("--mixed", action="store_true", help="Déplacer HEAD et réinitialiser l'index (défaut)")
-    parser.add_argument("--hard", action="store_true", help="Déplacer HEAD, réinitialiser l'index et le working directory")
-    parser.add_argument("--git-dir", default=GIT_DIR, help="Chemin du dossier .mygit")
+    parser.add_argument("commit_ref", help="Commit reference (SHA, HEAD, branch, etc.)")
+    parser.add_argument("--soft", action="store_true", help="Move HEAD only")
+    parser.add_argument("--mixed", action="store_true", help="Move HEAD and reset the index (default)")
+    parser.add_argument("--hard", action="store_true", help="Move HEAD, reset the index and the working directory")
+    parser.add_argument("--git-dir", default=GIT_DIR, help="Path to the .mygit directory")
     args = parser.parse_args()
     if args.soft:
         mode = "soft"
